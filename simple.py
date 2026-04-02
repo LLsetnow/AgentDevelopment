@@ -1,5 +1,4 @@
-import os
-import json
+import yaml
 from dataclasses import dataclass
 from typing import List, Optional, Callable, Any
 import requests
@@ -9,6 +8,28 @@ from datetime import datetime
 class Message:
     role: str
     content: str
+
+
+def load_config(config_path: str = "config.yaml") -> dict:
+    """
+    从 YAML 文件加载配置
+    
+    Args:
+        config_path: 配置文件路径
+        
+    Returns:
+        配置字典
+    """
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        print(f"配置文件 {config_path} 不存在，请先创建配置文件")
+        return {}
+    except Exception as e:
+        print(f"加载配置文件失败: {str(e)}")
+        return {}
+
 
 class DeepSeekAgent:
     """简单的 Agent 框架，使用 DeepSeek API"""
@@ -158,8 +179,15 @@ class DeepSeekAgent:
 
 def main():
     """示例用法"""
+    # 从配置文件加载配置
+    config = load_config()
+    api_key = config.get("api_key", "")
+    
+    if not api_key:
+        print("错误: 请在 config.yaml 中配置 api_key")
+        return
+    
     # 初始化 Agent
-    api_key = "sk-9a8b8caa389c42258399c0f3ed2a2884"
     agent = DeepSeekAgent(api_key=api_key)
     
     # 设置系统提示
